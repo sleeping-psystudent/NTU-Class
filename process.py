@@ -6,8 +6,8 @@ def SQL_storage(data):
     conn = sqlite3.connect('classrooms.db')
     cursor = conn.cursor()
 
-    # 清空檔案
-    cursor.execute('truncate table history')
+    # 清空表格資料
+    cursor.execute('DELETE FROM classroom_info')
 
     # 創建表格
     cursor.execute('''

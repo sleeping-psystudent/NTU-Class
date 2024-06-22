@@ -14,13 +14,14 @@ def crawler(url):
                 dl.append(element[0])
 
     # source: https://blog.csdn.net/fengqianlang/article/details/130080073
-    data = list(
-        {
-            dictionary['cr_cono']: dictionary
-            for dictionary in dl
-        }.values()
-    )
-    return data
+    # data = list(
+    #     {
+    #         dictionary['cr_cono']: dictionary
+    #         for dictionary in dl
+    #     }.values()
+    # )
+    
+    return dl
 
 def latest_semester():
     url = "https://gra206.aca.ntu.edu.tw/classrm/acarm/webcr-use-new"

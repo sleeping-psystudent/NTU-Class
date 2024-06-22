@@ -1,12 +1,21 @@
 import gradio as gr
 import process
-import datetime
+from datetime import datetime, timedelta
 import lib
+import collections
+
+def adjust_time(time_str):
+    start_time, end_time = time_str.split('~')
+    end_time = end_time.strip()
+    end_time_dt = datetime.strptime(end_time, "%H:%M")
+    adjusted_end_time_dt = end_time_dt + timedelta(minutes=50)
+    adjusted_end_time = adjusted_end_time_dt.strftime("%H:%M")
+    return f"{start_time}~{adjusted_end_time}"
 
 # source: https://www.cnblogs.com/tian777/p/17371619.html
 def store(progress = gr.Progress()):
     progress(0, desc="Starting")
-    time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     data = [{'cr_cono': time,
     'cr_clas': '',
     'cr_cnam': '',
@@ -19,7 +28,48 @@ def store(progress = gr.Progress()):
     for clroom in progress.tqdm(clrooms, desc="Reversing"):
         url = "https://gra206.aca.ntu.edu.tw/classrm/acarm/webcr-use-new?SYearDDL="+sem+"&BuildingDDL=%25&RoomDDL="+clroom+"&SelectButton=%E6%9F%A5%E8%A9%A2"
         data += lib.crawler(url)
-    process.SQL_storage(data)
+    
+    # 同課程識別碼、同課名、同老師但不同教室、時間的課程合併
+    courses = collections.defaultdict(lambda: {
+        'cr_cono': '',
+        'cr_clas': '',
+        'cr_cnam': '',
+        'cr_tenam': '',
+        'cr_no': '',
+        'cr_time': ''
+    })
+
+    for course in data:
+        if course['cr_time'] != '':
+            adj_time = adjust_time(course['cr_time'])
+        else:
+            adj_time = ''
+
+        key = (course['cr_cono'], course['cr_clas'], course['cr_cnam'], course['cr_tenam'])
+        if not courses[key]['cr_cono']:
+            courses[key]['cr_cono'] = course['cr_cono']
+            courses[key]['cr_clas'] = course['cr_clas']
+            courses[key]['cr_cnam'] = course['cr_cnam']
+            courses[key]['cr_tenam'] = course['cr_tenam']
+            courses[key]['cr_no'] = course['cr_no']
+            courses[key]['cr_time'] = adj_time
+        else:
+            if course['cr_no'] in courses[key]['cr_no']:
+                continue
+            else:
+                courses[key]['cr_no']+=f"<br>{course['cr_no']}"
+                
+            adj_time = adjust_time(course['cr_time'])
+            if adj_time in courses[key]['cr_time']:
+                continue
+            else:
+                courses[key]['cr_time']+=f"<br>{adj_time}"
+
+    data_re = []
+    for course in courses.values():
+        data_re.append(course)
+
+    process.SQL_storage(data_re)
 
 def main():
     with gr.Blocks() as demo:

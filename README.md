@@ -1,4 +1,4 @@
-# NTU-Class
+# NTU Classroom Schedule Crawler
 
 This program retrieves the latest semester's course information from the [NTU classroom schedule website](https://gra206.aca.ntu.edu.tw/classrm/index.php/acarm/webcr-use-new). Users can search for courses by entering course keywords or instructor names, and click on the listed course names to view past course syllabus records. When the dataset needs updating, users can click the update button to refresh the dataset, which takes about seven minutes.
 

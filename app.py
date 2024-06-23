@@ -12,7 +12,6 @@ def adjust_time(time_str):
     adjusted_end_time = adjusted_end_time_dt.strftime("%H:%M")
     return f"{start_time}~{adjusted_end_time}"
 
-# source: https://www.cnblogs.com/tian777/p/17371619.html
 def store(progress = gr.Progress()):
     progress(0, desc="Starting")
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -25,6 +24,8 @@ def store(progress = gr.Progress()):
 
     sem = lib.latest_semester()
     clrooms = lib.class_rooms()
+    
+    # source: https://www.cnblogs.com/tian777/p/17371619.html
     for clroom in progress.tqdm(clrooms, desc="Reversing"):
         url = "https://gra206.aca.ntu.edu.tw/classrm/acarm/webcr-use-new?SYearDDL="+sem+"&BuildingDDL=%25&RoomDDL="+clroom+"&SelectButton=%E6%9F%A5%E8%A9%A2"
         data += lib.crawler(url)
@@ -54,15 +55,9 @@ def store(progress = gr.Progress()):
             courses[key]['cr_no'] = course['cr_no']
             courses[key]['cr_time'] = adj_time
         else:
-            if course['cr_no'] in courses[key]['cr_no']:
-                continue
-            else:
+            if course['cr_no'] not in courses[key]['cr_no']:
                 courses[key]['cr_no']+=f"<br>{course['cr_no']}"
-                
-            adj_time = adjust_time(course['cr_time'])
-            if adj_time in courses[key]['cr_time']:
-                continue
-            else:
+            if adj_time not in courses[key]['cr_time']:
                 courses[key]['cr_time']+=f"<br>{adj_time}"
 
     data_re = []

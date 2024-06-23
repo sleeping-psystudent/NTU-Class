@@ -47,6 +47,10 @@ def generate(course_name, teacher_name, selected_day):
     if teacher_name != "":
         result = result[result['cr_tenam'].str.contains(teacher_name, na=False)]
 
+    if result.empty:
+        result = pd.DataFrame(columns=['班次', '課程名稱', '授課教師', '教室', '時間'])
+        return time, result.to_html(index=False, escape=False)
+
     day_mapping = {
         "不限": "無",
         "星期一": "一",
